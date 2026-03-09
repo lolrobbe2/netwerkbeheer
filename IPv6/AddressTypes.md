@@ -19,6 +19,14 @@
 
 ![MULTICAST-VISUALIZED](multicast-visualized.png)
 
+### Address
+
+![MULTICAST-ADDRESS](multicast-address.png)
+
+> [!NOTE] Scope
+>
+> ![Adress-Scope](multicast-scope.png)
+
 ## **(3) ANYCAST**
 
 > ONE => NEIREST NEIGBOUR
