@@ -13,6 +13,8 @@
 
 ![UNICAST-VISUALIZED](unicast-visualized.png)
 
+![UNICAST-ADDR](global-unicast-address.png)
+
 ## **(2) MULTICAST**
 
 > ONE => MANY
