@@ -105,3 +105,105 @@ on ipv4 an ARP message was broadcast across the network and then the correspondi
 > #h6 terminal
 >ip -6 addr add fe80::1/64 dev eth1
 > ```
+
+#### question 2:
+
+> `Which multicast addresses are relevant for address resolution?`
+Solicited-Node Multicast Address:
+
+1) ff02::1:ff48:2434
+
+### 1.2 Static ULA IPv6 Addresses
+
+| Hostname | IP Address        | NIC  |
+| -------- | ----------------- | ---- |
+| Router   | fd00:1d:14b:1::1  | eth1 |
+| Host h6  | fd00:1d:14b:1::6  | eth0 |
+| Host h66 | fd00:1d:14b:1::66 | eth0 |
+
+#### question 3
+
+> Explain what happens when adding the address to the interface.
+
+two `multicast listener v2` messages get sent.
+
+1 for: `Joining the "All-Nodes" Multicast (ff02::1)`
+
+2 for: `Joining the "Solicited-Node" Multicast (ff02::1:ff00:6)`
+
+> The router was already configured with an ULA address in this LAN. Can you ping his
+address?
+
+No because this address is not in our `routing table` and it is not a multivast address
+
+### 1.3 Static ULA IPv6 Addresses - DAD
+
+#### reflection:
+
+![dad-collision](dad-collision.png)
+
+> Explain how IPv6 makes sure that no duplicate addresses are possible - see the traffic in your WireShark trace!
+
+h66 sends out a solicitation message anouncing: i want claim this ip...
+
+h6 then notices that h66 is trying to claim it's IP addr and responds with a advertisement message wich tells h66: hey this is in use.
+
+![dad-failed-show](dad-failed-show.png)
+
+> ```bash
+> ip -6 addr add fd00:1d:14b:1::66/64 dev eth0
+> ```
+
+### 1.4 ULA IPv6 Addresses - routing
+
+> Have a look at the routing table of e.g. host h6. Why are you not able to reach this
+server?
+
+![routing-h66](routing-h66.png)
+
+No we cannot reach the DNS sever because there is no default gateway set, as the dns server is across the router.
+
+> `ip -6 route add default via fd00:1d:14b:1::1`
+
+![routing-h66-default](routing-h66-default.png)
+
+## 2 Connecting to the IPv6 Internet
+
+### 2.1 verify the router
+
+![route-router](route-router.png)
+
+we need to look for a 2002 Ipv6-4 transfer address.
+the prefix will be the 32 remaining bytes wich is the provided IPv4 addr from the ISP.
+
+> 2002:a73:7854 => 0a.73.78.54 => 10.115.120.84
+
+Test your connectivity by pinging an IPv6 host, like ipv6.google.com or www.he.net.
+
+> this won't work because we got no `Global Unicast Address`
+
+### 2.2 GUA for the hosts - static
+
+#### reflection
+
+>What is the length of the subnet we should distribute to our hosts? How many subnets can we hence create in our new IPv6 network? The first subnet available shall be used for the configuration of your clients LAN
+
+answer /64 => 2^16 subnets 65535 subnets
+
+#### ETH1 router
+
+mac: `52:3e:b8:00:2a:56`
+EUI-54: 523e:b8ff:fe00:2a:56 => flip bit 7 (0101 0000) => 503e:b8ff:fe00:2a:56
+prefix: 2002:a73:7854:1
+GUA: 2002:a73:7854:1:503e:b8ff:fe00:2a56/64
+
+#### H6
+
+EUI-64: `fe80::0A07:08ff:fe13:1210`
+prefix: 2002:a73:7854:1
+
+GUA:  2002:a73:7854:1:0A07:08ff:fe13:1210/64
+
+> Reflection: Why can’t we ping a hostname?
+>
+> because the DNS server has not been set
